@@ -3,28 +3,39 @@
     require_once('../inc/connect.php');
     session_start();
 
-    $login = 0;
-
-
     if(isset($_POST['logout']))
     {
-        //setcookie('superadmin', -1, time() - 3600);
         session_destroy();
+        header("Refresh:0");
+        die();
+    }
+
+    if(isset($_SESSION['auth']) && $_SESSION['auth'])
+    {
+        $login = 1;
+    }
+    else
+    {
+        $login = 0;
+        if(!isset($_POST['login'])) $db = null;
     }
 
     /*-------------------------------------------- New Student -------------------------------------------------------------------- */
-    if(isset($_POST['submit']))
+    if($login && $_SESSION['auth'])
     {
-        $query = 'INSERT INTO tbldude (plz_id, nachname, vorname) VALUES (:PLZ, :nachname, :vorname)';
+        if(isset($_POST['submit']))
+        {
+            $query = 'INSERT INTO tbldude (plz_id, nachname, vorname) VALUES (:PLZ, :nachname, :vorname)';
 
-        $prepStat = $db -> prepare($query);
+            $prepStat = $db -> prepare($query);
 
-        $prepStat -> bindParam(':PLZ', $_POST['PLZ']);
-        $prepStat -> bindParam(':nachname', $_POST['nachname']);
-        $prepStat -> bindParam(':vorname', $_POST['vorname']);
+            $prepStat -> bindParam(':PLZ', $_POST['PLZ']);
+            $prepStat -> bindParam(':nachname', $_POST['nachname']);
+            $prepStat -> bindParam(':vorname', $_POST['vorname']);
 
-        $prepStat -> execute();
-        $prepStat -> errorInfo()[2];
+            $prepStat -> execute();
+            $prepStat -> errorInfo()[2];
+        }
     }
 
     /*----------------------------------------- Login for the Page is done -------------------------------------------------------- */
@@ -35,14 +46,13 @@
         if(!empty($_POST['username']) && !empty($_POST['password']))
         {
 
-            $pw = crypt($_POST['password'], $hash_salt);
+            //$pw = password_hash($_POST['password'], PASSWORD_BCRYPT);
        
-            $query = "SELECT * FROM tbladmin WHERE username = :username AND password = :password";
+            $query = "SELECT * FROM tbladmin WHERE username = :username";
 
             $prepStat = $db -> prepare($query);
 
             $prepStat -> bindParam(':username', $_POST['username']);
-            $prepStat -> bindParam(':password', $pw);
 
             if($prepStat -> execute())
             {
@@ -50,9 +60,19 @@
 
                 $vorname = $result['vorname'];
                 $nachname = $result['nachname'];
-                $_SESSION['superadmin'] = $result['superadmin'];
+                $_SESSION['auth'] = password_verify($_POST['password'], $result['password']);
 
-                echo 'welcome ' . $vorname . ' ' . $nachname;
+                if($_SESSION['auth'])
+                {
+                    $_SESSION['superadmin'] = $result['superadmin'];
+
+                    echo 'welcome ' . $vorname . ' ' . $nachname;
+                }
+                else
+                {
+                    echo 'Logindaten sind falsch';
+                }
+
             }
             else
             {
@@ -67,16 +87,15 @@
 
     /*-------------------------------------------------------------- Neuer Admin erstellen --------------------------------------------------------------*/
     
-    if (isset($_SESSION['superadmin']))
+    if ($login && $_SESSION['auth'])
     {
-
 
         if(isset($_POST['newAdmin']))
         {
 
             if (!empty($_POST['username']) && !empty($_POST['password'])) {
 
-                $pw = crypt($_POST['password'], $hash_salt);
+                $pw = password_hash($_POST['password'], PASSWORD_BCRYPT);
                 
                 $query = 'INSERT INTO tbladmin (email, vorname, nachname, username, password) VALUES (:email, :vorname, :nachname, :username, :password);';
 
@@ -99,8 +118,6 @@
             }
         }
     }
-
-    echo $_SESSION['superadmin'];
 ?>
 
 <!--****************************************** HTML-Start **********************************************************************************************-->
@@ -123,7 +140,7 @@
 
   <!-- ************************************* Logout Button ********************************************************************* -->       
         <?php 
-            if(isset($_SESSION['superadmin']))
+            if($login && $_SESSION['auth'])
             {
                 ?>
               
@@ -136,13 +153,16 @@
             }
         
             /*---------------------------------------------- Information for Formular für new Schüler ----------------------------------------------*/
-            if(isset($_SESSION['superadmin']))
+            if($login && $_SESSION['auth'])
             {
 
                 $query = 'SELECT * from tblplz order by ort;';
 
                 $result = $db -> query($query);
                 $resultAll = $result -> fetchAll();
+
+                $db = null;
+                $prepStat = null;
 
                 ?>
 
@@ -199,7 +219,7 @@
             }
 
             /*--------------------------------------------------- Neuen Admin erstellen (nur für superadmins) ------------------------------------------------------------------------------*/
-            if(isset($_SESSION['superadmin']) && $_SESSION['superadmin'])
+            if($login && $_SESSION['auth'] && $_SESSION['superadmin'])
             {
                 ?>
 

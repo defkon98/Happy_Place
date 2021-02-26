@@ -59,6 +59,8 @@
             $json[] = $temp;
         }
     }
+    
+    $db = null;
 
     echo json_encode($json);
 
