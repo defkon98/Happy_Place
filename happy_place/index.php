@@ -199,7 +199,7 @@
             }
 
             /*--------------------------------------------------- Neuen Admin erstellen (nur für superadmins) ------------------------------------------------------------------------------*/
-            if(isset($_SESSION['superadmin']) && $_SESSION['superadmin'] === 1)
+            if(isset($_SESSION['superadmin']) && $_SESSION['superadmin'])
             {
                 ?>
 
