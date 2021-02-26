@@ -12,9 +12,7 @@
         $username = htmlspecialchars($_POST['username']);
         $password = htmlspecialchars($_POST['password']);
 
-
-        $hash_salt = '$6$rounds=5000$ijustwanttobed$';
-        $password = crypt($password, $hash_salt); 
+        $password = password_hash($password, PASSWORD_BCRYPT);
 
         $query = 'insert into tbladmin (email, vorname, nachname, username, password, superadmin) values (:email, :name, :nachname, :username, :password, 1);'; 
 
