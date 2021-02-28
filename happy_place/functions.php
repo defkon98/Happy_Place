@@ -1,4 +1,6 @@
 <?php
+
+
 /******************************** Check the login stat **********************************************************/
 //Checks if user is logged in or not.
 
@@ -18,6 +20,7 @@
 
         return $login;
     }
+
 
 /******************************** Check login params **********************************************************/
 //Checks if the user who made a try to login, is really an admin
@@ -43,31 +46,24 @@
             {
                 $result = $prepStat -> fetch();
 
-                if ($result !== false)
+                //Save the name of the user (for personal greeting), verify password and safe the verification in the session
+                $vorname = $result['vorname'];
+                $nachname = $result['nachname'];
+                $_SESSION['auth'] = password_verify($_POST['password'], $result['password']);
+
+                //If all went good, user is logged in and gets a greeting
+                if($_SESSION['auth'])
                 {
-                    //Save the name of the user (for personal greeting), verify password and safe the verification in the session
-                    $vorname = $result['vorname'];
-                    $nachname = $result['nachname'];
-                    $_SESSION['auth'] = password_verify($_POST['password'], $result['password']);
+                    $_SESSION['superadmin'] = $result['superadmin'];
 
-                    //If all went good, user is logged in and gets a greeting
-                    if($_SESSION['auth'])
-                    {
-                        $_SESSION['superadmin'] = $result['superadmin'];
-
-                        echo 'welcome ' . $vorname . ' ' . $nachname;
-                    }
-                    else
-                    {
-                        //When the password isnt correct, say it to the user
-                        echo 'Logindaten sind falsch';
-                    }
+                    echo 'welcome ' . $vorname . ' ' . $nachname;
                 }
                 else
                 {
                     //When the password isnt correct, say it to the user
                     echo 'Logindaten sind falsch';
                 }
+
             }
             else
             {
@@ -110,10 +106,9 @@
 
     function footerForAdmins($db)
     {
-        
         ?>
             <div class="edit_students">
-                
+
                 <fieldset>
                     <legend>Schüler bearbeiten oder löschen</legend>
                     
@@ -124,6 +119,9 @@
                         
                         $result = $db -> query($query);
                         $resultAll = $result -> fetchAll();
+
+                        $db = null;
+
                         //Lets make a form, for every student we have
                         foreach($resultAll as $row)
                         {    
@@ -132,21 +130,13 @@
                             //When the admin wants to edit a student, theres gona be a form with text and a select of living-places
                             if(isset($_POST['edit']))
                             {
-                                if($_POST['dudeid'] == $row['id'])
+                                if($_POST['id'] == $row['id'])
                                 {
                                     echo '<input type="text" name="editnachname" value="' . $row['nachname'] . '"><input type="text" name="editvorname" value="' . $row['vorname'] . '"> ';
                                     echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
                                     echo '<select name="changeplz">';
 
-                                    //This just works, because its initialized in the function before
-                                    // -NOPE- sadly, this does NOT work, because $resultAllOrte is scoped to the other function. We could execute the query outside of the function.
-                                    // for now, I'm just redoing the query - unelegant, but safe
-                                    $query = 'SELECT * from tblplz order by ort;';
-
-                                    $result = $db -> query($query);
-                                    $resultAllOrte = $result -> fetchAll();
-                                    $db = null;
-
+                                    //This just works, because its initialized in the function bevore
                                     foreach ($resultAllOrte as $rowOrt) {
                                         //We need here $resultAllOrte and not the return of the query in this function, because the query in this function wont give us every single place
 
@@ -168,24 +158,27 @@
                                 }
                                 else
                                 {
-                                    //Form for students not meant to be edited right now
+                                    //Form for students, where arent meant to edit right now
                                     echo  $row['nachname'] . ' ' . $row['vorname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
                                     echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
                                     echo '<input type="submit" name="edit" value="edit">  <input type="submit" name="delete" value="delete">';
+                                        
                                     echo '</form>';
                                 }
                             }
                             else
                             {
-                                //Form to show all students, when edit isn't clicked
+                                //Form to show all students, when edit isnt klicket
                                 echo $row['nachname'] . ' ' . $row['vorname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
                                 echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
                                 echo '<input type="submit" name="edit" value="edit">  <input type="submit" name="delete" value="delete">';
+                                    
                                 echo '</form>';
                             }
                         }
+                
                             echo '</fieldset>';
-                        echo '</div>';      
+                        echo '</div>';
                     ?>
                 </fieldset>
             </div>
