@@ -24,8 +24,6 @@
 
     function loginCheck($db)
     {
-        //$login is true because the user tried to login in this load
-        $login = 1;
 
         //Check if user filled the form
         if(!empty($_POST['username']) && !empty($_POST['password']))
@@ -80,10 +78,6 @@
             //In case, if the user tries to login without a username or without a password
             echo 'Bitte Passwort und Benutzername eingeben';
         }
-        
-
-        return $login;
-
     }
 
 
