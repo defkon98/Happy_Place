@@ -1,6 +1,7 @@
 <?php
     require_once('../inc/db_inc.php');
     require_once('../inc/connect.php');
+    include('functions.php');
     session_start();
 
     if(isset($_POST['logout']))
@@ -10,17 +11,10 @@
         die();
     }
 
-    if(isset($_SESSION['auth']) && $_SESSION['auth'])
-    {
-        $login = 1;
-    }
-    else
-    {
-        $login = 0;
-        if(!isset($_POST['login'])) $db = null;
-    }
+/************************************************** Check if user is logged in ***************************************************************/
+    $login = alreadyLoggedIn();
 
-    /*-------------------------------------------- New Student -------------------------------------------------------------------- */
+/************************************************** Create new Student if logged in ***************************************************************/
     if($login && $_SESSION['auth'])
     {
         if(isset($_POST['submit']))
@@ -78,50 +72,10 @@
 
 
     /*----------------------------------------- Login for the Page is done -------------------------------------------------------- */
+
     if(isset($_POST['login']))
     {
-        $login = 1;
-
-        if(!empty($_POST['username']) && !empty($_POST['password']))
-        {
-
-            //$pw = password_hash($_POST['password'], PASSWORD_BCRYPT);
-       
-            $query = "SELECT * FROM tbladmin WHERE username = :username";
-
-            $prepStat = $db -> prepare($query);
-
-            $prepStat -> bindParam(':username', $_POST['username']);
-
-            if($prepStat -> execute())
-            {
-                $result = $prepStat -> fetch();
-
-                $vorname = $result['vorname'];
-                $nachname = $result['nachname'];
-                $_SESSION['auth'] = password_verify($_POST['password'], $result['password']);
-
-                if($_SESSION['auth'])
-                {
-                    $_SESSION['superadmin'] = $result['superadmin'];
-
-                    echo 'welcome ' . $vorname . ' ' . $nachname;
-                }
-                else
-                {
-                    echo 'Logindaten sind falsch';
-                }
-
-            }
-            else
-            {
-                echo 'Logindaten sind Falsch';
-            }
-        }
-        else
-        {
-            echo 'Bitte Passwort und Benutzername eingeben';
-        }
+        loginCheck($db);
     }
 
     /*-------------------------------------------------------------- Neuer Admin erstellen --------------------------------------------------------------*/
@@ -197,15 +151,7 @@
             /*---------------------------------------------- Information for Formular für new Schüler ----------------------------------------------*/
             if($login && $_SESSION['auth'])
             {
-
-                $query = 'SELECT * from tblplz order by ort;';
-
-                $result = $db -> query($query);
-                $resultAllOrte = $result -> fetchAll();
-
                 ?>
-
-
 
                 <!--************************************* Neuer Schüler erfassen **************************************************************-->
                 <div class="formula">
@@ -231,9 +177,7 @@
                                     <option value=""></option>
                                     <?php 
 
-                                        foreach ($resultAllOrte as $row) {
-                                            echo '<option value="' . $row['plz_id'] . '">' . $row['ort'] . ', ' . $row['plz'] . '</option>';
-                                        }
+                                        dropDownLivingPlace($db);
 
                                     ?>
                                 </select>
@@ -321,76 +265,11 @@
     </div>
 
     <?php
+
+    /*--------------------------------------------------------- Show all Students to admin -------------------------------------------------------*/
         if($login && $_SESSION['auth'])
         {
-            ?>
-                <div class="edit_students">
-
-                    <fieldset>
-                        <legend>Schüler bearbeiten oder löschen</legend>
-                        
-                        <?php
-
-
-                            // $resultAllOrte is needed here for the dropdown
-
-                            $query = 'SELECT dude.id as id, dude.vorname as vorname, dude.nachname as nachname, dude.plz_id as dudeplz, ort.ort as ort, ort.plz as plz from tbldude as dude join tblplz as ort where dude.plz_id = ort.plz_id order by nachname';
-                            
-                            $result = $db -> query($query);
-                            $resultAll = $result -> fetchAll();
-
-                            $db = null;
-
-                            foreach($resultAll as $row)
-                            {    
-                                echo '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '">';
-
-                                if(isset($_POST['edit']))
-                                {
-                                    if($_POST['id'] == $row['id'])
-                                    {
-                                        echo '<input type="text" name="editnachname" value="' . $row['nachname'] . '"><input type="text" name="editvorname" value="' . $row['vorname'] . '"> ';
-                                        echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
-                                        echo '<select name="changeplz">';
-
-                                        foreach ($resultAllOrte as $rowOrt) {
-
-                                            if($row['dudeplz'] == $rowOrt['plz_id'])
-                                            {
-                                                echo '<option value="' . $rowOrt['plz_id'] . '" selected="selected">' . $rowOrt['ort'] . ', ' . $rowOrt['plz'] . '</option>';
-                                            }
-                                            else
-                                            {
-                                                echo '<option value="' . $rowOrt['plz_id'] . '">' . $rowOrt['ort'] . ', ' . $rowOrt['plz'] . '</option>';
-                                            }
-                                           
-                                        }
-                                        
-                                        echo '</select>';
-                                        echo '<input type="submit" name="submitedit" value="speichern">';
-                                        echo '</form>';
-                                    }
-                                    else
-                                    {
-                                        echo  $row['nachname'] . ' ' . $row['vorname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
-                                        echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
-                                        echo '<input type="submit" name="edit" value="edit">  <input type="submit" name="delete" value="delete">';
-                                            
-                                        echo '</form>';
-                                    }
-                                }
-                                else
-                                {
-                                    echo $row['nachname'] . ' ' . $row['vorname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
-                                    echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
-                                    echo '<input type="submit" name="edit" value="edit">  <input type="submit" name="delete" value="delete">';
-                                        
-                                    echo '</form>';
-                                }
-                            }
-                    
-                    echo '</fieldset>';
-                echo '</div>';
+            footerForAdmins($db);
         }
     ?>
 </body>
