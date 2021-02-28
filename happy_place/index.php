@@ -38,17 +38,30 @@
     {
         if(isset($_POST['submitedit']))
         {
-            $query = 'UPDATE tbldude set plz_id = :plz_id, nachname = :nachname, vorname = :vorname where id = :id;';
+            try
+            {
+                $query = 'UPDATE tbldude set plz_id = :plz_id, nachname = :nachname, vorname = :vorname where id = :id;';
 
-            $prepStat = $db -> prepare($query);
+                $prepStat = $db -> prepare($query);
 
-            $prepStat -> bindParam(':plz_id', $_POST['changeplz']);
-            $prepStat -> bindParam(':nachname', $_POST['editnachname']);
-            $prepStat -> bindParam(':vorname', $_POST['editvorname']);
-            $prepStat -> bindParam(':id', $_POST['dudeid']);
+                $prepStat -> bindParam(':plz_id', $_POST['changeplz']);
+                $prepStat -> bindParam(':nachname', $_POST['editnachname']);
+                $prepStat -> bindParam(':vorname', $_POST['editvorname']);
+                $prepStat -> bindParam(':id', $_POST['dudeid']);
 
-            $prepStat -> execute();
-            $prepStat -> errorInfo()[2];
+                $prepStat -> execute();
+                $prepStat -> errorInfo()[2];
+            }
+            // Fehler-Behandlung
+            catch(PDOException $e){
+                // Fehlermeldung ohne Details, wird auch im produktiven Web gezeigt
+                echo '<p>Edit fehlgeschlagen! Bitte beschweren Sie sich bei der Steuerbehörde.';
+            
+                // Detaillierte Fehlermeldung, wird nur auf dem Testserver angezeigt (da, wo display_errors auf on gesetzt ist)
+                if(ini_get('display_errors')){
+                echo '<br>' . $e->getMessage();
+                }
+            }
         }
     }
 
@@ -58,15 +71,27 @@
     {
         if(isset($_POST['delete']))
         {
-            $query = 'DELETE FROM tbldude WHERE id = :id;';
+            try
+            {
+                $query = 'DELETE FROM tbldude WHERE id = :id;';
 
-            $prepStat = $db -> prepare($query);
+                $prepStat = $db -> prepare($query);
 
-            $prepStat -> bindParam(':id', $_POST['dudeid']);
+                $prepStat -> bindParam(':id', $_POST['dudeid']);
 
-            $prepStat -> execute();
-            $prepStat -> errorInfo()[2];
-
+                $prepStat -> execute();
+                $prepStat -> errorInfo()[2];
+            }
+            // Fehler-Behandlung
+            catch(PDOException $e){
+                // Fehlermeldung ohne Details, wird auch im produktiven Web gezeigt
+                echo '<p>Löschen fehlgeschlagen! Bitte beschweren Sie sich bei der Steuerbehörde.';
+            
+                // Detaillierte Fehlermeldung, wird nur auf dem Testserver angezeigt (da, wo display_errors auf on gesetzt ist)
+                if(ini_get('display_errors')){
+                echo '<br>' . $e->getMessage();
+                }
+            }
         }
     }
 
