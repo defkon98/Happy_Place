@@ -4271,7 +4271,7 @@ ALTER TABLE `tblplz`
 -- Constraints der Tabelle `tbldude`
 --
 ALTER TABLE `tbldude`
-  ADD CONSTRAINT `tbldude_ibfk_1` FOREIGN KEY (`plz_id`) REFERENCES `tblplz` (`plz_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `tbldude_ibfk_1` FOREIGN KEY (`plz_id`) REFERENCES `tblplz` (`plz_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
