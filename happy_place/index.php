@@ -34,19 +34,48 @@
 
         if(!empty($_POST['username']) && !empty($_POST['password']))
         {
+<<<<<<< Updated upstream
 
             $pw = crypt($_POST['password'], $hash_salt);
        
             $query = "SELECT * FROM tbladmin WHERE username = :username AND password = :password";
+=======
+            try
+            {
+                $query = 'UPDATE tbldude set plz_id = :plz_id, nachname = :nachname, vorname = :vorname where id = :id;';
+>>>>>>> Stashed changes
 
-            $prepStat = $db -> prepare($query);
+                $prepStat = $db -> prepare($query);
 
+<<<<<<< Updated upstream
             $prepStat -> bindParam(':username', $_POST['username']);
             $prepStat -> bindParam(':password', $pw);
 
             if($prepStat -> execute())
             {
                 $result = $prepStat -> fetch();
+=======
+                $prepStat -> bindParam(':plz_id', $_POST['changeplz']);
+                $prepStat -> bindParam(':nachname', $_POST['editnachname']);
+                $prepStat -> bindParam(':vorname', $_POST['editvorname']);
+                $prepStat -> bindParam(':id', $_POST['dudeid']);
+
+                $prepStat -> execute();
+                $prepStat -> errorInfo()[2];
+            }
+            // Fehler-Behandlung
+            catch(PDOException $e){
+                // Fehlermeldung ohne Details, wird auch im produktiven Web gezeigt
+                echo '<p>Edit fehlgeschlagen! Bitte beschweren Sie sich bei der Steuerbehörde.';
+            
+                // Detaillierte Fehlermeldung, wird nur auf dem Testserver angezeigt (da, wo display_errors auf on gesetzt ist)
+                if(ini_get('display_errors')){
+                echo '<br>' . $e->getMessage();
+                }
+            }
+        }
+    }
+>>>>>>> Stashed changes
 
                 $vorname = $result['vorname'];
                 $nachname = $result['nachname'];
@@ -61,7 +90,31 @@
         }
         else
         {
+<<<<<<< Updated upstream
             echo 'Bitte Passwort und Benutzername eingeben';
+=======
+            try
+            {
+                $query = 'DELETE FROM tbldude WHERE id = :id;';
+
+                $prepStat = $db -> prepare($query);
+
+                $prepStat -> bindParam(':id', $_POST['dudeid']);
+
+                $prepStat -> execute();
+                $prepStat -> errorInfo()[2];
+            }
+            // Fehler-Behandlung
+            catch(PDOException $e){
+                // Fehlermeldung ohne Details, wird auch im produktiven Web gezeigt
+                echo '<p>Löschen fehlgeschlagen! Bitte beschweren Sie sich bei der Steuerbehörde.';
+            
+                // Detaillierte Fehlermeldung, wird nur auf dem Testserver angezeigt (da, wo display_errors auf on gesetzt ist)
+                if(ini_get('display_errors')){
+                echo '<br>' . $e->getMessage();
+                }
+            }
+>>>>>>> Stashed changes
         }
     }
 
