@@ -204,7 +204,7 @@
                                     <option value=""></option>
                                     <?php 
 
-                                        dropDownLivingPlace($db);
+                                        $resultAllOrte = dropDownLivingPlace($db);
 
                                     ?>
                                 </select>
@@ -296,7 +296,7 @@
     /*--------------------------------------------------------- Show all Students to admin -------------------------------------------------------*/
         if($login && $_SESSION['auth'])
         {
-            footerForAdmins($db);
+            footerForAdmins($db, $resultAllOrte);
         }
     ?>
 </body>

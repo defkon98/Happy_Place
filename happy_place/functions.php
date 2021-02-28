@@ -96,13 +96,15 @@
         foreach ($resultAllOrte as $row) {
             echo '<option value="' . $row['plz_id'] . '">' . $row['ort'] . ', ' . $row['plz'] . '</option>';
         }
+
+        return $resultAllOrte;
     }
 
 
 /******************************** Admin-footer **********************************************************/
 //Special form included dropdown for the footer of admins to delete and edit the Students and have an overview
 
-    function footerForAdmins($db)
+    function footerForAdmins($db, $resultAllOrte)
     {
         
         ?>
@@ -131,15 +133,6 @@
                                     echo '<input type="text" name="editnachname" value="' . $row['nachname'] . '"><input type="text" name="editvorname" value="' . $row['vorname'] . '"> ';
                                     echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
                                     echo '<select name="changeplz">';
-
-                                    //This just works, because its initialized in the function before
-                                    // -NOPE- sadly, this does NOT work, because $resultAllOrte is scoped to the other function. We could execute the query outside of the function.
-                                    // for now, I'm just redoing the query - unelegant, but safe
-                                    $query = 'SELECT * from tblplz order by ort;';
-
-                                    $result = $db -> query($query);
-                                    $resultAllOrte = $result -> fetchAll();
-                                    $db = null;
 
                                     foreach ($resultAllOrte as $rowOrt) {
                                         //We need here $resultAllOrte and not the return of the query in this function, because the query in this function wont give us every single place
