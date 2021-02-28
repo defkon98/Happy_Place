@@ -44,20 +44,37 @@
     {
         if(isset($_POST['submitedit']))
         {
-            $query = 'UPDATE tbldude set plz_id = :plz_id, nachname = :nachname, vorname = :vorname;';
+            $query = 'UPDATE tbldude set plz_id = :plz_id, nachname = :nachname, vorname = :vorname where id = :id;';
 
             $prepStat = $db -> prepare($query);
 
             $prepStat -> bindParam(':plz_id', $_POST['changeplz']);
             $prepStat -> bindParam(':nachname', $_POST['editnachname']);
             $prepStat -> bindParam(':vorname', $_POST['editvorname']);
+            $prepStat -> bindParam(':id', $_POST['dudeid']);
 
             $prepStat -> execute();
             $prepStat -> errorInfo()[2];
         }
     }
 
+    /*------------------------------------------------ Delete Student ----------------------------------------------------------------*/
 
+    if($login && $_SESSION['auth'])
+    {
+        if(isset($_POST['delete']))
+        {
+            $query = 'DELETE FROM tbldude WHERE id = :id;';
+
+            $prepStat = $db -> prepare($query);
+
+            $prepStat -> bindParam(':id', $_POST['dudeid']);
+
+            $prepStat -> execute();
+            $prepStat -> errorInfo()[2];
+
+        }
+    }
 
 
     /*----------------------------------------- Login for the Page is done -------------------------------------------------------- */
@@ -317,12 +334,10 @@
 
                             // $resultAllOrte is needed here for the dropdown
 
-                            $query = 'SELECT dude.id as id, dude.vorname as vorname, dude.nachname as nachname, dude.plz_id as dudeplz, ort.ort as ort, ort.plz as plz from tbldude as dude join tblplz as ort where dude.plz_id = ort.plz_id';
+                            $query = 'SELECT dude.id as id, dude.vorname as vorname, dude.nachname as nachname, dude.plz_id as dudeplz, ort.ort as ort, ort.plz as plz from tbldude as dude join tblplz as ort where dude.plz_id = ort.plz_id order by nachname';
                             
                             $result = $db -> query($query);
                             $resultAll = $result -> fetchAll();
-
-                            print_r($resultAll);
 
                             $db = null;
 
@@ -334,18 +349,19 @@
                                 {
                                     if($_POST['id'] == $row['id'])
                                     {
-                                        echo '<input type="text" name="editvorname" value="' . $row['vorname'] . '"> <input type="text" name="editnachname" value="' . $row['nachname'] . '">';
+                                        echo '<input type="text" name="editnachname" value="' . $row['nachname'] . '"><input type="text" name="editvorname" value="' . $row['vorname'] . '"> ';
+                                        echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
                                         echo '<select name="changeplz">';
 
                                         foreach ($resultAllOrte as $rowOrt) {
 
                                             if($row['dudeplz'] == $rowOrt['plz_id'])
                                             {
-                                                echo '<option value="' . $rowOrt['plz'] . '" selected="selected">' . $rowOrt['ort'] . ', ' . $rowOrt['plz'] . '</option>';
+                                                echo '<option value="' . $rowOrt['plz_id'] . '" selected="selected">' . $rowOrt['ort'] . ', ' . $rowOrt['plz'] . '</option>';
                                             }
                                             else
                                             {
-                                                echo '<option value="' . $rowOrt['plz'] . '">' . $rowOrt['ort'] . ', ' . $rowOrt['plz'] . '</option>';
+                                                echo '<option value="' . $rowOrt['plz_id'] . '">' . $rowOrt['ort'] . ', ' . $rowOrt['plz'] . '</option>';
                                             }
                                            
                                         }
@@ -356,8 +372,8 @@
                                     }
                                     else
                                     {
-                                        echo $row['vorname'] . ' ' . $row['nachname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
-                                        echo '<input type="hidden" name="id" value="' . $row['id'] . '">';
+                                        echo  $row['nachname'] . ' ' . $row['vorname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
+                                        echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
                                         echo '<input type="submit" name="edit" value="edit">  <input type="submit" name="delete" value="delete">';
                                             
                                         echo '</form>';
@@ -365,8 +381,8 @@
                                 }
                                 else
                                 {
-                                    echo $row['vorname'] . ' ' . $row['nachname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
-                                    echo '<input type="hidden" name="id" value="' . $row['id'] . '">';
+                                    echo $row['nachname'] . ' ' . $row['vorname'] . ' ' . $row['plz'] . ' - ' . $row['ort'];
+                                    echo '<input type="hidden" name="dudeid" value="' . $row['id'] . '">';
                                     echo '<input type="submit" name="edit" value="edit">  <input type="submit" name="delete" value="delete">';
                                         
                                     echo '</form>';
