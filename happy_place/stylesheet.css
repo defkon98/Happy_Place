@@ -44,3 +44,8 @@ form{
     display: inline-block;
     font-size: 16px;
 }
+
+.edit_students{
+    height: 500px;
+    width: 80%;
+}

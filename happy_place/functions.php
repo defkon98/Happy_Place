@@ -123,7 +123,7 @@
                         //Lets make a form, for every student we have
                         foreach($resultAll as $row)
                         {    
-                            echo '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '">';
+                            echo '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="formula">';
 
                             //When the admin wants to edit a student, theres gona be a form with text and a select of living-places
                             if(isset($_POST['edit']))
@@ -171,8 +171,7 @@
                                 echo '</form>';
                             }
                         }
-                            echo '</fieldset>';
-                        echo '</div>';      
+                        echo '</fieldset>';
                     ?>
                 </fieldset>
             </div>
